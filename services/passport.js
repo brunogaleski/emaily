@@ -23,7 +23,8 @@ passport.use(
     {
       clientID: keys.google.clientID,
       clientSecret: keys.google.clientSecret,
-      callbackURL: '/auth/google/callback'
+      callbackURL: '/auth/google/callback',
+      proxy: true
     },
     (accessToken, refreshToken, profile, done) => {
       User.findOne({googleID: profile.id})
@@ -48,7 +49,8 @@ passport.use(
       clientID: keys.facebook.clientID,
       clientSecret: keys.facebook.clientSecret,
       callbackURL: '/auth/facebook/callback',
-      profileFields: ['id', 'displayName', 'email', 'political']
+      profileFields: ['id', 'displayName', 'email', 'political'],
+      proxy: true
     },
     (accessToken, refreshToken, profile, done) => {
       User.findOne({facebookID: profile.id})
