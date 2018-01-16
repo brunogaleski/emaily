@@ -10,11 +10,9 @@ passport.serializeUser((user, done) => {
   done(null, user.id)
 })
 
-passport.deserializeUser((id, done) => {
-  User.findById(id)
-    .then(user => {
-      done(null, user)
-    })
+passport.deserializeUser(async (id, done) => {
+  const user = await User.findById(id)
+  done(null, user)
 })
 
 // Google passport configs
@@ -26,18 +24,14 @@ passport.use(
       callbackURL: '/auth/google/callback',
       proxy: true
     },
-    (accessToken, refreshToken, profile, done) => {
-      User.findOne({googleID: profile.id})
-      .then((existingUser) => {
-        if (existingUser) {
-          // User already exists
-          done(null, existingUser)
-        } else {
-          new User({ googleID: profile.id, facebookID: null, emails: profile.emails })
-            .save()
-            .then(user => done(null, user))
-        }
-      })
+    async (accessToken, refreshToken, profile, done) => {
+      const existingUser = await User.findOne({googleID: profile.id})
+      if (existingUser) {
+        return done(null, existingUser)
+      }
+
+      const user = await new User({ googleID: profile.id, facebookID: null, emails: profile.emails }).save()
+      done(null, user)
     }
   )
 )
@@ -52,18 +46,14 @@ passport.use(
       profileFields: ['id', 'displayName', 'email', 'political'],
       proxy: true
     },
-    (accessToken, refreshToken, profile, done) => {
-      User.findOne({facebookID: profile.id})
-        .then((existingUser) => {
-          if (existingUser) {
-            // User already exists
-            done(null, existingUser)
-          } else {
-            new User({ googleID: null, facebookID: profile.id, emails: profile.emails })
-              .save()
-              .then(user => done(null, user))
-          }
-        })
+    async (accessToken, refreshToken, profile, done) => {
+      const existingUser = await User.findOne({facebookID: profile.id})
+      if (existingUser) {
+        return done(null, existingUser)
+      }
+
+      const user = await new User({ googleID: null, facebookID: profile.id, emails: profile.emails }).save()
+      done(null, user)
     }
   )
 )
